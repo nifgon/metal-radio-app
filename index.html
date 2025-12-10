@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Metal Radio</title>
+    <!-- Подключаем скрипт Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #212121);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .cover {
+            width: 200px;
+            height: 200px;
+            background-color: #333;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        h2 { margin: 0 0 10px 0; }
+        p { margin: 0 0 30px 0; opacity: 0.7; }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Обложка (пока заглушка) -->
+    <div class="cover">🎸</div>
+
+    <h2 id="track-name">Metal Radio</h2>
+    <p id="artist-name">Ждем эфир...</p>
+
+    <!-- Сюда потом вставим твой поток MyRadio24 -->
+    <audio id="radio-player" preload="none">
+        <!-- Замени ссылку ниже на свой поток, когда найдешь его -->
+        <source src="https://myradio24.org/ПОТОК" type="audio/mpeg">
+    </audio>
+
+    <button id="play-btn">PLAY</button>
+
+    <script>
+        // Сообщаем телеграму, что приложение готово
+        window.Telegram.WebApp.ready();
+        // Расширяем на весь экран
+        window.Telegram.WebApp.expand();
+
+        const audio = document.getElementById('radio-player');
+        const btn = document.getElementById('play-btn');
+        let isPlaying = false;
+
+        btn.addEventListener('click', () => {
+            if (!isPlaying) {
+                audio.play();
+                btn.textContent = "PAUSE";
+                document.getElementById('track-name').textContent = "В эфире";
+            } else {
+                audio.pause();
+                btn.textContent = "PLAY";
+                document.getElementById('track-name').textContent = "Пауза";
+            }
+            isPlaying = !isPlaying;
+        });
+    </script>
+</body>
+</html>
