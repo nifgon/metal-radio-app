@@ -58,18 +58,32 @@
             font-size: 14px;
         }
         
-        button {
+                button {
             padding: 15px 50px;
             font-size: 20px;
             font-weight: bold;
-            border: none;
+            border: 2px solid #a61a1a; /* Красная рамка */
             border-radius: 12px;
-            background-color: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            
+            /* Цвет фона: темно-красный */
+            background-color: #7a0909; 
+            
+            /* Цвет текста */
+            color: #ffffff;
+            
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); /* Легкое свечение */
         }
-        button:active { transform: scale(0.95); }
+
+        button:active { 
+            transform: scale(0.95); 
+            background-color: #a61a1a; /* Светлеет при нажатии */
+            box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
+        }
+
     </style>
 </head>
 <body>
