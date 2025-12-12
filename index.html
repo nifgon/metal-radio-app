@@ -161,9 +161,10 @@
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
-                        artist: song ? artist : "Metal Radio",
+                        artist: song ? artist : "OVOD Radio",
                         artwork: [
-                            { src: data.img || 'https://via.placeholder.com/512/333333/fff?text=Radio', sizes: '512x512', type: 'image/png' }
+                            /*{ src: data.img || 'https://via.placeholder.com/512/333333/fff?text=Radio', sizes: '512x512', type: 'image/png' }*/
+                            { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
                         ]
                     });
                 }
