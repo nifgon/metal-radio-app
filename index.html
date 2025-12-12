@@ -45,7 +45,8 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             /* Заглушка, если картинки нет */
-            background-image: url('https://via.placeholder.com/200x200/333333/ffffff?text=Metal'); 
+            /*background-image: url('https://via.placeholder.com/200x200/333333/ffffff?text=Metal'); */
+            background-image: url('cover.png');
         }
         h2 { 
             margin: 0 10px 10px; 
@@ -152,9 +153,9 @@
                 }
 
                 // Обновляем картинку (если сервер её прислал)
-                if (data.img) {
+                /*if (data.img) {
                     coverEl.style.backgroundImage = `url('${data.img}')`;
-                }
+                }*/
 
                 // 3. Обновляем Локскрин (чтобы на заблокированном телефоне было видно)
                 if ('mediaSession' in navigator) {
