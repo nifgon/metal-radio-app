@@ -60,6 +60,7 @@
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            /* ВСЕГДА ТВОЯ КАРТИНКА */
             background-image: url('cover.png');
         }
         
@@ -87,25 +88,27 @@
             box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
-        /* Стиль новой кнопки ссылки */
+        /* КОМПАКТНЫЙ СТИЛЬ КНОПКИ */
         .artist-link-btn {
-            display: none; /* Скрыта по умолчанию */
+            display: none; 
             margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 12px;
+            padding: 6px 15px; /* Уменьшил отступы */
+            font-size: 10px;   /* Уменьшил шрифт */
             font-weight: bold;
             text-decoration: none;
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
+            border-radius: 15px; /* Чуть меньше скругление */
             background-color: rgba(0, 0, 0, 0.5);
             transition: all 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            opacity: 0.8;
         }
         .artist-link-btn:hover {
             background-color: rgba(255, 255, 255, 0.2);
             border-color: #fff;
+            opacity: 1;
         }
 
     </style>
@@ -128,9 +131,9 @@
 
     <button id="play-btn">PLAY</button>
 
-    <!-- НОВАЯ КНОПКА ССЫЛКИ -->
+    <!-- КНОПКА ССЫЛКИ -->
     <a id="artist-link" href="#" target="_blank" class="artist-link-btn">
-        TELEGRAM ГРУППЫ
+        TELEGRAM
     </a>
 
     <script>
@@ -142,21 +145,17 @@
         const titleEl = document.getElementById('song-title');
         const artistEl = document.getElementById('artist-name');
         const programLabelEl = document.getElementById('program-label');
-        const coverEl = document.getElementById('album-cover');
+        // const coverEl = document.getElementById('album-cover'); // Нам это больше не нужно менять
         const artistLinkEl = document.getElementById('artist-link');
 
         const USER_LOGIN = 'ovodtune'; 
 
         // ==========================================
-        // БАЗА ДАННЫХ ССЫЛОК НА ГРУППЫ
-        // Название группы пиши ТОЧНО как в MyRadio24 (можно маленькими буквами)
-        // ==========================================
+        // БАЗА ДАННЫХ ССЫЛОК
         const artistLinks = {
-            "revocation": "https://t.me/ovod_radio",
+            "metallica": "https://t.me/metallica",
             "slipknot": "https://t.me/slipknot",
-            "aria": "https://t.me/aria_official",
-            "rammstein": "https://t.me/rammstein",
-            // Добавляй свои группы сюда...
+            // Добавляй свои...
         };
         // ==========================================
 
@@ -199,36 +198,26 @@
                     artistEl.textContent = artist;
                 }
 
-                // 3. ЛОГИКА КНОПКИ ССЫЛКИ
-                // Приводим имя артиста к маленьким буквам для поиска в базе
+                // 3. ЛОГИКА КНОПКИ
                 let artistKey = artist.toLowerCase();
-                
                 if (artistLinks[artistKey]) {
-                    // Если группа найдена в нашем списке
                     artistLinkEl.href = artistLinks[artistKey];
                     artistLinkEl.style.display = "inline-block";
                     artistLinkEl.textContent = "КАНАЛ " + artist.toUpperCase();
                 } else {
-                    // Если группы нет в списке - скрываем кнопку
                     artistLinkEl.style.display = "none";
                 }
 
-                // 4. ОБЛОЖКА И ЛОКСКРИН
-                let currentCover = 'cover.png'; 
-                let lockscreenCover = 'https://nifgon.github.io/metal-radio-app/cover.png'; // Лучше полный путь
-
-                if (data.img && data.img.trim() !== "") {
-                    let serverCover = "https://myradio24.com/" + data.img;
-                    currentCover = serverCover;
-                    lockscreenCover = serverCover;
-                }
-                coverEl.style.backgroundImage = `url('${currentCover}')`;
-
+                // 4. ЛОКСКРИН (Всегда твоя статичная картинка)
+                // Убрали загрузку data.img
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
                         artist: song ? artist : showName,
-                        artwork: [{ src: lockscreenCover, sizes: '512x512', type: 'image/png' }]
+                        artwork: [
+                            // Сюда вставь полную ссылку на картинку для надежности
+                            { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
+                        ]
                     });
                 }
 
