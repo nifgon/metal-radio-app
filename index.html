@@ -196,10 +196,26 @@
 
                 // 1. НАЗВАНИЕ ПЕРЕДАЧИ
                 let showName = "OVOD RADIO"; 
-                if (data.playlist && data.playlist.trim() !== "") showName = data.playlist;
-                else if (data.djname && data.djname.trim() !== "") showName = data.djname;
-                else if (data.streamname && data.streamname.trim() !== "") showName = data.streamname;
+
+                // Выбираем откуда брать имя
+                if (data.playlist && data.playlist.trim() !== "") {
+                    showName = data.playlist;
+                } else if (data.djname && data.djname.trim() !== "") {
+                    showName = data.djname;
+                } else if (data.streamname && data.streamname.trim() !== "") {
+                    showName = data.streamname;
+                }
+
+                // === ФИКС: Убираем нижние подчеркивания ===
+                // Заменяем все "_" на пробелы
+                showName = showName.replace(/_/g, " ");
+                
+                // (Опционально) Если хочешь убрать расширения типа .m3u, если они вдруг вылезут
+                showName = showName.replace(".m3u", "");
+                // ==========================================
+
                 programLabelEl.textContent = showName;
+
 
                 // 2. ТРЕК И АРТИСТ
                 const fullString = data.song || "Metal Radio Live";
