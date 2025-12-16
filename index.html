@@ -12,10 +12,8 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            
             color: #ffffff;
             font-family: sans-serif;
-            
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,26 +25,22 @@
             box-sizing: border-box;
         }
 
-        /* --- НОВЫЕ СТИЛИ ВЕРХНЕГО БЛОКА --- */
-        
         .status-container {
-            margin-bottom: 20px; /* Отступ всего блока от обложки */
+            margin-bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px; /* Расстояние между "В ЭФИРЕ" и названием */
+            gap: 5px;
         }
 
-        /* Маленькая надпись "В ЭФИРЕ" */
         .on-air-label {
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: #ffffff;
-            opacity: 0.6; /* Чуть приглушенный белый */
+            opacity: 0.6;
         }
 
-        /* Название передачи (красное) */
         .program-label {
             font-size: 16px;       
             font-weight: 700;        
@@ -68,16 +62,9 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             background-image: url('cover.png');
         }
-        h2 { 
-            margin: 0 10px 10px; 
-            font-size: 20px;
-            line-height: 1.3;
-        }
-        p { 
-            margin: 0 0 30px 0; 
-            opacity: 0.7; 
-            font-size: 14px;
-        }
+        
+        h2 { margin: 0 10px 10px; font-size: 20px; line-height: 1.3; }
+        p { margin: 0 0 20px 0; opacity: 0.7; font-size: 14px; }
         
         button {
             padding: 15px 50px;
@@ -100,11 +87,31 @@
             box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
+        /* Стиль новой кнопки ссылки */
+        .artist-link-btn {
+            display: none; /* Скрыта по умолчанию */
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .artist-link-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- НОВЫЙ БЛОК: Статус эфира -->
     <div class="status-container">
         <div class="on-air-label">В ЭФИРЕ</div>
         <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
@@ -121,6 +128,11 @@
 
     <button id="play-btn">PLAY</button>
 
+    <!-- НОВАЯ КНОПКА ССЫЛКИ -->
+    <a id="artist-link" href="#" target="_blank" class="artist-link-btn">
+        TELEGRAM ГРУППЫ
+    </a>
+
     <script>
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
@@ -130,8 +142,23 @@
         const titleEl = document.getElementById('song-title');
         const artistEl = document.getElementById('artist-name');
         const programLabelEl = document.getElementById('program-label');
+        const coverEl = document.getElementById('album-cover');
+        const artistLinkEl = document.getElementById('artist-link');
 
         const USER_LOGIN = 'ovodtune'; 
+
+        // ==========================================
+        // БАЗА ДАННЫХ ССЫЛОК НА ГРУППЫ
+        // Название группы пиши ТОЧНО как в MyRadio24 (можно маленькими буквами)
+        // ==========================================
+        const artistLinks = {
+            "metallica": "https://t.me/metallica",
+            "slipknot": "https://t.me/slipknot",
+            "aria": "https://t.me/aria_official",
+            "rammstein": "https://t.me/rammstein",
+            // Добавляй свои группы сюда...
+        };
+        // ==========================================
 
         let isPlaying = false;
 
@@ -151,24 +178,18 @@
                 const response = await fetch(`https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`);
                 const data = await response.json();
 
-                // === ЛОГИКА НАЗВАНИЯ ПЕРЕДАЧИ ===
+                // 1. НАЗВАНИЕ ПЕРЕДАЧИ
                 let showName = "OVOD RADIO"; 
-
-                if (data.playlist && data.playlist.trim() !== "") {
-                    showName = data.playlist;
-                } else if (data.djname && data.djname.trim() !== "") {
-                    showName = data.djname;
-                } else if (data.streamname && data.streamname.trim() !== "") {
-                    showName = data.streamname;
-                }
-                
+                if (data.playlist && data.playlist.trim() !== "") showName = data.playlist;
+                else if (data.djname && data.djname.trim() !== "") showName = data.djname;
+                else if (data.streamname && data.streamname.trim() !== "") showName = data.streamname;
                 programLabelEl.textContent = showName;
-                // =================================
 
+                // 2. ТРЕК И АРТИСТ
                 const fullString = data.song || "Metal Radio Live";
                 let parts = fullString.split(' - ');
-                let artist = parts[0]; 
-                let song = parts[1] || ""; 
+                let artist = parts[0] ? parts[0].trim() : ""; 
+                let song = parts[1] ? parts[1].trim() : ""; 
 
                 if (!song) {
                     titleEl.textContent = artist;
@@ -178,13 +199,36 @@
                     artistEl.textContent = artist;
                 }
 
+                // 3. ЛОГИКА КНОПКИ ССЫЛКИ
+                // Приводим имя артиста к маленьким буквам для поиска в базе
+                let artistKey = artist.toLowerCase();
+                
+                if (artistLinks[artistKey]) {
+                    // Если группа найдена в нашем списке
+                    artistLinkEl.href = artistLinks[artistKey];
+                    artistLinkEl.style.display = "inline-block";
+                    artistLinkEl.textContent = "КАНАЛ " + artist.toUpperCase();
+                } else {
+                    // Если группы нет в списке - скрываем кнопку
+                    artistLinkEl.style.display = "none";
+                }
+
+                // 4. ОБЛОЖКА И ЛОКСКРИН
+                let currentCover = 'cover.png'; 
+                let lockscreenCover = 'https://nifgon.github.io/metal-radio-app/cover.png'; // Лучше полный путь
+
+                if (data.img && data.img.trim() !== "") {
+                    let serverCover = "https://myradio24.com/" + data.img;
+                    currentCover = serverCover;
+                    lockscreenCover = serverCover;
+                }
+                coverEl.style.backgroundImage = `url('${currentCover}')`;
+
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
                         artist: song ? artist : showName,
-                        artwork: [
-                            { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
-                        ]
+                        artwork: [{ src: lockscreenCover, sizes: '512x512', type: 'image/png' }]
                     });
                 }
 
