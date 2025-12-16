@@ -60,7 +60,6 @@
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            /* ВСЕГДА ТВОЯ КАРТИНКА */
             background-image: url('cover.png');
         }
         
@@ -88,17 +87,17 @@
             box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
-        /* КОМПАКТНЫЙ СТИЛЬ КНОПКИ */
+        /* Кнопка ссылки */
         .artist-link-btn {
             display: none; 
             margin-top: 15px;
-            padding: 6px 15px; /* Уменьшил отступы */
-            font-size: 10px;   /* Уменьшил шрифт */
+            padding: 6px 15px;
+            font-size: 10px;
             font-weight: bold;
             text-decoration: none;
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px; /* Чуть меньше скругление */
+            border-radius: 15px;
             background-color: rgba(0, 0, 0, 0.5);
             transition: all 0.2s;
             text-transform: uppercase;
@@ -111,6 +110,77 @@
             opacity: 1;
         }
 
+        /* Кнопка истории */
+        #history-btn {
+            margin-top: 10px;
+            padding: 8px 24px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid #444;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        /* Оверлей истории */
+        .history-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .history-panel {
+            width: 90%;
+            max-width: 360px;
+            max-height: 70vh;
+            background: #111;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-close {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .history-close:hover {
+            opacity: 1;
+        }
+
+        .history-list {
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .history-item-time {
+            color: #777;
+            font-size: 11px;
+        }
+
+        .history-item-title {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -132,9 +202,25 @@
     <button id="play-btn">PLAY</button>
 
     <!-- КНОПКА ССЫЛКИ -->
-    <a id="artist-link" href="#" target="_blank" class="artist-link-btn">
+    <a id="artist-link" href="#" class="artist-link-btn">
         TELEGRAM
     </a>
+
+    <!-- КНОПКА ИСТОРИИ -->
+    <button id="history-btn">HISTORY</button>
+
+    <!-- ОВЕРЛЕЙ ИСТОРИИ -->
+    <div id="history-overlay" class="history-overlay">
+      <div class="history-panel">
+        <div class="history-header">
+          <span>История эфира</span>
+          <span id="history-close" class="history-close">✕</span>
+        </div>
+        <div id="history-list" class="history-list">
+          Загрузка истории...
+        </div>
+      </div>
+    </div>
 
     <script>
         window.Telegram.WebApp.ready();
@@ -145,36 +231,49 @@
         const titleEl = document.getElementById('song-title');
         const artistEl = document.getElementById('artist-name');
         const programLabelEl = document.getElementById('program-label');
-        // const coverEl = document.getElementById('album-cover'); // Нам это больше не нужно менять
         const artistLinkEl = document.getElementById('artist-link');
-              artistLinkEl.addEventListener('click', (e) => {
+
+        const historyBtn = document.getElementById('history-btn');
+        const historyOverlay = document.getElementById('history-overlay');
+        const historyClose = document.getElementById('history-close');
+        const historyList = document.getElementById('history-list');
+
+        artistLinkEl.addEventListener('click', (e) => {
             e.preventDefault();
             const url = artistLinkEl.getAttribute('href');
 
             if (url) {
-                // Если это ссылка на Телеграм (t.me)
                 if (url.includes('t.me') && window.Telegram && window.Telegram.WebApp) {
-                    // Используем openTelegramLink - это откроет канал внутри приложения
                     window.Telegram.WebApp.openTelegramLink(url);
                 } else {
-                    // Для всех остальных ссылок (если будут) используем старый метод
                     window.Telegram.WebApp.openLink(url);
                 }
             }
         });
 
+        // Открытие/закрытие истории
+        historyBtn.addEventListener('click', () => {
+            historyOverlay.style.display = 'flex';
+        });
+
+        historyClose.addEventListener('click', () => {
+            historyOverlay.style.display = 'none';
+        });
+
+        historyOverlay.addEventListener('click', (e) => {
+            if (e.target === historyOverlay) {
+                historyOverlay.style.display = 'none';
+            }
+        });
+
         const USER_LOGIN = 'ovodtune'; 
 
-        // ==========================================
-        // БАЗА ДАННЫХ ССЫЛОК
         const artistLinks = {
             "netherlands": "https://t.me/ovod_radio",
             "torche": "https://t.me/slipknot",
             "helms alee": "https://t.me/ovod_radio",
             "red lama": "https://t.me/ovod_radio"
-            // Добавляй свои...
         };
-        // ==========================================
 
         let isPlaying = false;
 
@@ -197,7 +296,6 @@
                 // 1. НАЗВАНИЕ ПЕРЕДАЧИ
                 let showName = "OVOD RADIO"; 
 
-                // Выбираем откуда брать имя
                 if (data.playlist && data.playlist.trim() !== "") {
                     showName = data.playlist;
                 } else if (data.djname && data.djname.trim() !== "") {
@@ -206,16 +304,9 @@
                     showName = data.streamname;
                 }
 
-                // === ФИКС: Убираем нижние подчеркивания ===
-                // Заменяем все "_" на пробелы
                 showName = showName.replace(/_/g, " ");
-                
-                // (Опционально) Если хочешь убрать расширения типа .m3u, если они вдруг вылезут
                 showName = showName.replace(".m3u", "");
-                // ==========================================
-
                 programLabelEl.textContent = showName;
-
 
                 // 2. ТРЕК И АРТИСТ
                 const fullString = data.song || "Metal Radio Live";
@@ -231,7 +322,7 @@
                     artistEl.textContent = artist;
                 }
 
-                // 3. ЛОГИКА КНОПКИ
+                // 3. КНОПКА ССЫЛКИ
                 let artistKey = artist.toLowerCase();
                 if (artistLinks[artistKey]) {
                     artistLinkEl.href = artistLinks[artistKey];
@@ -241,14 +332,37 @@
                     artistLinkEl.style.display = "none";
                 }
 
-                // 4. ЛОКСКРИН (Всегда твоя статичная картинка)
-                // Убрали загрузку data.img
+                // 4. ИСТОРИЯ (если поле есть)
+                if (Array.isArray(data.songs) && data.songs.length > 0) {
+                    const lastSongs = data.songs.slice(-10).reverse();
+
+                    let html = '';
+                    lastSongs.forEach(item => {
+                        const time = item.time || '';
+                        const a = item.artist || '';
+                        const t = item.songtitle || '';
+                        const full = t ? `${a} - ${t}` : (item.song || '');
+
+                        html += `
+                            <div class="history-item">
+                                <div class="history-item-time">${time}</div>
+                                <div class="history-item-title">${full}</div>
+                            </div>
+                            <hr style="border:0;border-top:1px solid #222;margin:4px 0;">
+                        `;
+                    });
+
+                    historyList.innerHTML = html;
+                } else {
+                    historyList.innerHTML = "История пока пуста.";
+                }
+
+                // 5. ЛОКСКРИН
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
                         artist: song ? artist : showName,
                         artwork: [
-                            // Сюда вставь полную ссылку на картинку для надежности
                             { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
                         ]
                     });
