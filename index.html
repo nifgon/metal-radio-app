@@ -147,21 +147,22 @@
         const programLabelEl = document.getElementById('program-label');
         // const coverEl = document.getElementById('album-cover'); // Нам это больше не нужно менять
         const artistLinkEl = document.getElementById('artist-link');
-           artistLinkEl.addEventListener('click', (e) => {
-            // Отменяем стандартный переход, который ломает приложение на ПК
+              artistLinkEl.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Берем ссылку из атрибута href
             const url = artistLinkEl.getAttribute('href');
-            
-            // Используем нативный метод Telegram
-            if (url && window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openLink(url);
-            } else {
-                // Фоллбэк, если вдруг открыто не в Телеграме
-                window.open(url, '_blank');
+
+            if (url) {
+                // Если это ссылка на Телеграм (t.me)
+                if (url.includes('t.me') && window.Telegram && window.Telegram.WebApp) {
+                    // Используем openTelegramLink - это откроет канал внутри приложения
+                    window.Telegram.WebApp.openTelegramLink(url);
+                } else {
+                    // Для всех остальных ссылок (если будут) используем старый метод
+                    window.Telegram.WebApp.openLink(url);
+                }
             }
         });
+
         const USER_LOGIN = 'ovodtune'; 
 
         // ==========================================
