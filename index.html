@@ -7,22 +7,15 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
        body {
-            /* Базовый цвет фона (если картинка не прогрузится) */
             background-color: #000000;
-            
-            /* Твоя картинка */
             background-image: url('bg.png');
-            
-            /* Растягиваем на весь экран, не повторяем */
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             
-            /* Цвет текста оставляем белым */
             color: #ffffff;
             font-family: sans-serif;
             
-            /* Центровка контента */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,23 +23,38 @@
             height: 100vh;
             margin: 0;
             text-align: center;
-            
-            /* Чтобы контент не прилипал к рамке, добавим отступы внутри */
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* --- НОВЫЙ СТИЛЬ: Название передачи --- */
+        /* --- НОВЫЕ СТИЛИ ВЕРХНЕГО БЛОКА --- */
+        
+        .status-container {
+            margin-bottom: 20px; /* Отступ всего блока от обложки */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px; /* Расстояние между "В ЭФИРЕ" и названием */
+        }
+
+        /* Маленькая надпись "В ЭФИРЕ" */
+        .on-air-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffffff;
+            opacity: 0.6; /* Чуть приглушенный белый */
+        }
+
+        /* Название передачи (красное) */
         .program-label {
-            font-size: 14px;       
+            font-size: 16px;       
             font-weight: 700;        
             text-transform: uppercase; 
             letter-spacing: 3px;     
-            color: #ff3333;          /* Красный акцент */
-            margin-bottom: 15px;     /* Отступ до обложки */
-            opacity: 0.9;
+            color: #ff3333;          
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
-            min-height: 18px; /* Чтобы не прыгало если пусто */
+            min-height: 20px; 
         }
 
         .cover {
@@ -58,8 +66,6 @@
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            /* Заглушка, если картинки нет */
-            /*background-image: url('https://via.placeholder.com/200x200/333333/ffffff?text=Metal'); */
             background-image: url('cover.png');
         }
         h2 { 
@@ -73,29 +79,24 @@
             font-size: 14px;
         }
         
-                button {
+        button {
             padding: 15px 50px;
             font-size: 20px;
             font-weight: bold;
-            border: 2px solid #a61a1a; /* Красная рамка */
+            border: 2px solid #a61a1a; 
             border-radius: 12px;
-            
-            /* Цвет фона: темно-красный */
             background-color: #7a0909; 
-            
-            /* Цвет текста */
             color: #ffffff;
-            
             cursor: pointer;
             transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); /* Легкое свечение */
+            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); 
         }
 
         button:active { 
             transform: scale(0.95); 
-            background-color: #a61a1a; /* Светлеет при нажатии */
+            background-color: #a61a1a; 
             box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
@@ -103,8 +104,11 @@
 </head>
 <body>
 
-    <!-- НОВЫЙ БЛОК: Название передачи -->
-    <div id="program-label" class="program-label">LOADING...</div>
+    <!-- НОВЫЙ БЛОК: Статус эфира -->
+    <div class="status-container">
+        <div class="on-air-label">В ЭФИРЕ</div>
+        <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+    </div>
 
     <div class="cover" id="album-cover"></div>
 
@@ -125,15 +129,12 @@
         const btn = document.getElementById('play-btn');
         const titleEl = document.getElementById('song-title');
         const artistEl = document.getElementById('artist-name');
-        const coverEl = document.getElementById('album-cover');
         const programLabelEl = document.getElementById('program-label');
 
-        // Твой логин на myradio24
         const USER_LOGIN = 'ovodtune'; 
 
         let isPlaying = false;
 
-        // 1. Управление кнопкой Play
         btn.addEventListener('click', () => {
             if (!isPlaying) {
                 audio.play();
@@ -145,39 +146,30 @@
             isPlaying = !isPlaying;
         });
 
-        // 2. Функция обновления названия трека и передачи
         async function updateMetadata() {
             try {
-                // Добавляем ?t=... чтобы браузер не кешировал запрос
                 const response = await fetch(`https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`);
                 const data = await response.json();
 
-                // === ЛОГИКА ОТОБРАЖЕНИЯ НАЗВАНИЯ ПЛЕЙЛИСТА ===
-                let showName = "OVOD RADIO"; // Значение по умолчанию
+                // === ЛОГИКА НАЗВАНИЯ ПЕРЕДАЧИ ===
+                let showName = "OVOD RADIO"; 
 
                 if (data.playlist && data.playlist.trim() !== "") {
                     showName = data.playlist;
                 } else if (data.djname && data.djname.trim() !== "") {
                     showName = data.djname;
                 } else if (data.streamname && data.streamname.trim() !== "") {
-                     // Часто тут бывает "Auto-DJ", можем выводить и его, или игнорировать
                     showName = data.streamname;
                 }
                 
-                // Ставим текст над обложкой
                 programLabelEl.textContent = showName;
-                // ============================================
+                // =================================
 
-                // data.song обычно приходит как "Artist - Title" или просто "Title"
                 const fullString = data.song || "Metal Radio Live";
-                
-                // Пробуем разделить Артиста и Трек по тире " - "
                 let parts = fullString.split(' - ');
                 let artist = parts[0]; 
-                let song = parts[1] || ""; // Если тире нет, все будет в artist
+                let song = parts[1] || ""; 
 
-                // Обновляем текст на экране
-                // Если parts[1] пустой, значит пришло просто название без разделителя
                 if (!song) {
                     titleEl.textContent = artist;
                     artistEl.textContent = "Сейчас играет";
@@ -186,11 +178,10 @@
                     artistEl.textContent = artist;
                 }
 
-                // 3. Обновляем Локскрин (чтобы на заблокированном телефоне было видно)
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
-                        artist: song ? artist : showName, // Вместо "OVOD Radio" показываем имя передачи
+                        artist: song ? artist : showName,
                         artwork: [
                             { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
                         ]
@@ -198,15 +189,13 @@
                 }
 
             } catch (error) {
-                console.error("Ошибка получения данных:", error);
+                console.error("Ошибка:", error);
             }
         }
 
-        // Запускаем обновление сразу и потом каждые 5 секунд
         updateMetadata();
         setInterval(updateMetadata, 5000);
 
-        // Настройка управления с локскрина (пауза/плей)
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => { audio.play(); isPlaying = true; btn.textContent = "PAUSE"; });
             navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); isPlaying = false; btn.textContent = "PLAY"; });
