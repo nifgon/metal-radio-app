@@ -35,6 +35,20 @@
             padding: 20px;
             box-sizing: border-box;
         }
+
+        /* --- НОВЫЙ СТИЛЬ: Название передачи --- */
+        .program-label {
+            font-size: 14px;       
+            font-weight: 700;        
+            text-transform: uppercase; 
+            letter-spacing: 3px;     
+            color: #ff3333;          /* Красный акцент */
+            margin-bottom: 15px;     /* Отступ до обложки */
+            opacity: 0.9;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+            min-height: 18px; /* Чтобы не прыгало если пусто */
+        }
+
         .cover {
             width: 200px;
             height: 200px;
@@ -89,6 +103,9 @@
 </head>
 <body>
 
+    <!-- НОВЫЙ БЛОК: Название передачи -->
+    <div id="program-label" class="program-label">LOADING...</div>
+
     <div class="cover" id="album-cover"></div>
 
     <h2 id="song-title">Metal Radio</h2>
@@ -109,6 +126,7 @@
         const titleEl = document.getElementById('song-title');
         const artistEl = document.getElementById('artist-name');
         const coverEl = document.getElementById('album-cover');
+        const programLabelEl = document.getElementById('program-label');
 
         // Твой логин на myradio24
         const USER_LOGIN = 'ovodtune'; 
@@ -127,12 +145,28 @@
             isPlaying = !isPlaying;
         });
 
-        // 2. Функция обновления названия трека
+        // 2. Функция обновления названия трека и передачи
         async function updateMetadata() {
             try {
                 // Добавляем ?t=... чтобы браузер не кешировал запрос
                 const response = await fetch(`https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`);
                 const data = await response.json();
+
+                // === ЛОГИКА ОТОБРАЖЕНИЯ НАЗВАНИЯ ПЛЕЙЛИСТА ===
+                let showName = "OVOD RADIO"; // Значение по умолчанию
+
+                if (data.playlist && data.playlist.trim() !== "") {
+                    showName = data.playlist;
+                } else if (data.djname && data.djname.trim() !== "") {
+                    showName = data.djname;
+                } else if (data.streamname && data.streamname.trim() !== "") {
+                     // Часто тут бывает "Auto-DJ", можем выводить и его, или игнорировать
+                    showName = data.streamname;
+                }
+                
+                // Ставим текст над обложкой
+                programLabelEl.textContent = showName;
+                // ============================================
 
                 // data.song обычно приходит как "Artist - Title" или просто "Title"
                 const fullString = data.song || "Metal Radio Live";
@@ -152,18 +186,12 @@
                     artistEl.textContent = artist;
                 }
 
-                // Обновляем картинку (если сервер её прислал)
-                /*if (data.img) {
-                    coverEl.style.backgroundImage = `url('${data.img}')`;
-                }*/
-
                 // 3. Обновляем Локскрин (чтобы на заблокированном телефоне было видно)
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
-                        artist: song ? artist : "OVOD Radio",
+                        artist: song ? artist : showName, // Вместо "OVOD Radio" показываем имя передачи
                         artwork: [
-                            /*{ src: data.img || 'https://via.placeholder.com/512/333333/fff?text=Radio', sizes: '512x512', type: 'image/png' }*/
                             { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
                         ]
                     });
