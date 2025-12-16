@@ -17,12 +17,29 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* теперь не по центру, а сверху */
             height: 100vh;
             margin: 0;
             text-align: center;
             padding: 20px;
             box-sizing: border-box;
+        }
+
+        /* Обёртка всего контента, чтобы кнопку прижать вниз */
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between; /* верхний блок и низ */
+            height: 100%;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .main-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .status-container {
@@ -87,7 +104,6 @@
             box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
-        /* Кнопка ссылки */
         .artist-link-btn {
             display: none; 
             margin-top: 15px;
@@ -110,9 +126,9 @@
             opacity: 1;
         }
 
-        /* Кнопка истории */
+        /* Кнопка истории внизу */
         #history-btn {
-            margin-top: 10px;
+            margin-top: 20px;
             padding: 8px 24px;
             font-size: 11px;
             border-radius: 999px;
@@ -124,7 +140,6 @@
             cursor: pointer;
         }
 
-        /* Оверлей истории */
         .history-overlay {
             position: fixed;
             inset: 0;
@@ -185,29 +200,32 @@
 </head>
 <body>
 
-    <div class="status-container">
-        <div class="on-air-label">В ЭФИРЕ</div>
-        <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+    <div class="app-wrapper">
+        <div class="main-block">
+            <div class="status-container">
+                <div class="on-air-label">В ЭФИРЕ</div>
+                <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+            </div>
+
+            <div class="cover" id="album-cover"></div>
+
+            <h2 id="song-title">Metal Radio</h2>
+            <p id="artist-name">Загрузка...</p>
+
+            <audio id="radio-player" preload="none">
+                <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
+            </audio>
+
+            <button id="play-btn">PLAY</button>
+
+            <a id="artist-link" href="#" class="artist-link-btn">
+                TELEGRAM
+            </a>
+        </div>
+
+        <!-- КНОПКА ИСТОРИИ ВНИЗУ -->
+        <button id="history-btn">Ранее в эфире</button>
     </div>
-
-    <div class="cover" id="album-cover"></div>
-
-    <h2 id="song-title">Metal Radio</h2>
-    <p id="artist-name">Загрузка...</p>
-
-    <audio id="radio-player" preload="none">
-        <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
-    </audio>
-
-    <button id="play-btn">PLAY</button>
-
-    <!-- КНОПКА ССЫЛКИ -->
-    <a id="artist-link" href="#" class="artist-link-btn">
-        TELEGRAM
-    </a>
-
-    <!-- КНОПКА ИСТОРИИ -->
-    <button id="history-btn">HISTORY</button>
 
     <!-- ОВЕРЛЕЙ ИСТОРИИ -->
     <div id="history-overlay" class="history-overlay">
@@ -332,7 +350,7 @@
                     artistLinkEl.style.display = "none";
                 }
 
-                // 4. ИСТОРИЯ (если поле есть)
+                // 4. ИСТОРИЯ
                 if (Array.isArray(data.songs) && data.songs.length > 0) {
                     const lastSongs = data.songs.slice(-10).reverse();
 
