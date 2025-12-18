@@ -6,31 +6,64 @@
     <title>Metal Radio</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+       /* Сброс отступов */
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+
+       html, body {
+            height: 100%;
+            overflow: hidden; /* Запрещаем скролл */
+       }
+
        body {
             background-color: #000000;
             background-image: url('bg.png');
-            background-size: contain;
+            background-size: contain; /* Картинка всегда видна целиком */
             background-position: center;
             background-repeat: no-repeat;
+            
             color: #ffffff;
             font-family: sans-serif;
+            
+            /* Центрируем наш контейнер */
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;      /* вернули как было */
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
+            justify-content: center;
         }
 
-        .status-container {
-            margin-bottom: 20px;
+        /* ГЛАВНЫЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ 
+           Ограничиваем его, чтобы на ПК не разъезжался */
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 450px; /* Макс ширина как у телефона */
+            max-height: 850px; 
+            
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            
+            /* Равномерно распределяем элементы по вертикали */
+            justify-content: space-between; 
+            
+            /* Отступы, чтобы не прилипало к краям рамки (шипам) */
+            padding: 80px 20px 40px 20px; 
+        }
+
+        /* Группировка верхнего контента */
+        .content-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Статус "В ЭФИРЕ" */
+        .status-container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
         }
 
         .on-air-label {
@@ -51,22 +84,36 @@
             min-height: 20px; 
         }
 
+        /* ОБЛОЖКА - АДАПТИВНАЯ */
         .cover {
-            width: 200px;
-            height: 200px;
+            /* Размер зависит от высоты экрана (25%), но не больше 250px и не меньше 120px */
+            height: 25vh; 
+            width: 25vh; 
+            max-height: 250px; max-width: 250px;
+            min-height: 120px; min-width: 120px;
+            
             background-color: #333;
             background-size: cover;
             background-position: center;
             border-radius: 15px;
-            margin-bottom: 20px;
+            
+            margin: 10px 0 20px 0; /* Отступы сверху и снизу */
+            
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             background-image: url('cover.png');
         }
         
-        h2 { margin: 0 10px 10px; font-size: 20px; line-height: 1.3; }
-        p  { margin: 0 0 20px 0; opacity: 0.7; font-size: 14px; }
+        /* ТЕКСТ ТРЕКА */
+        .track-info {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        h2 { margin: 0 0 5px 0; font-size: 20px; line-height: 1.2; word-wrap: break-word;}
+        p { margin: 0; opacity: 0.7; font-size: 14px; }
         
-        button {
+        /* КНОПКА PLAY - ЦЕНТРАЛЬНАЯ */
+        button#play-btn {
             padding: 15px 50px;
             font-size: 20px;
             font-weight: bold;
@@ -79,14 +126,15 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); 
+            margin-top: 10px;
         }
 
-        button:active { 
+        button#play-btn:active { 
             transform: scale(0.95); 
             background-color: #a61a1a; 
-            box-shadow: 0 0 20px rgba(166, 26, 26, 0.6);
         }
 
+        /* ССЫЛКА НА КАНАЛ */
         .artist-link-btn {
             display: none; 
             margin-top: 15px;
@@ -109,24 +157,25 @@
             opacity: 1;
         }
 
-        /* Кнопка "Ранее в эфире" фиксируем внизу */
+        /* НИЖНЯЯ ЧАСТЬ (ИСТОРИЯ) */
+        .content-bottom {
+            margin-top: auto; /* Прижимает блок к низу */
+            padding-bottom: 20px; /* Отступ от самого низа экрана */
+        }
+
         #history-btn {
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 66px;
             padding: 8px 24px;
             font-size: 11px;
             border-radius: 999px;
             border: 1px solid #444;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.6);
             color: #fff;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
-            z-index: 50;
         }
 
+        /* ОВЕРЛЕЙ ИСТОРИИ */
         .history-overlay {
             position: fixed;
             inset: 0;
@@ -159,52 +208,45 @@
             letter-spacing: 1px;
         }
 
-        .history-close {
-            cursor: pointer;
-            opacity: 0.7;
-        }
-
-        .history-close:hover {
-            opacity: 1;
-        }
-
-        .history-list {
-            font-size: 12px;
-            line-height: 1.4;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .history-item-time  { color: #777; font-size: 11px; }
+        .history-close { cursor: pointer; opacity: 0.7; }
+        .history-list { font-size: 12px; line-height: 1.4; overflow-y: auto; padding-right: 4px; }
+        .history-item-time { color: #777; font-size: 11px; }
         .history-item-title { color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="status-container">
-        <div class="on-air-label">В ЭФИРЕ</div>
-        <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+    <!-- Главный контейнер, который держит структуру -->
+    <div class="app-container">
+        
+        <!-- ВЕРХНЯЯ ЧАСТЬ -->
+        <div class="content-top">
+            <div class="status-container">
+                <div class="on-air-label">В ЭФИРЕ</div>
+                <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+            </div>
+
+            <div class="cover" id="album-cover"></div>
+
+            <div class="track-info">
+                <h2 id="song-title">Metal Radio</h2>
+                <p id="artist-name">Загрузка...</p>
+            </div>
+
+            <button id="play-btn">PLAY</button>
+
+            <a id="artist-link" href="#" class="artist-link-btn">
+                TELEGRAM
+            </a>
+        </div>
+
+        <!-- НИЖНЯЯ ЧАСТЬ (КНОПКА ИСТОРИИ) -->
+        <div class="content-bottom">
+            <button id="history-btn">Ранее в эфире</button>
+        </div>
     </div>
 
-    <div class="cover" id="album-cover"></div>
-
-    <h2 id="song-title">Metal Radio</h2>
-    <p id="artist-name">Загрузка...</p>
-
-    <audio id="radio-player" preload="none">
-        <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
-    </audio>
-
-    <button id="play-btn">PLAY</button>
-
-    <a id="artist-link" href="#" class="artist-link-btn">
-        TELEGRAM
-    </a>
-
-    <!-- Кнопка истории внизу -->
-    <button id="history-btn">Ранее в эфире</button>
-
-    <!-- Оверлей истории -->
+    <!-- ОВЕРЛЕЙ -->
     <div id="history-overlay" class="history-overlay">
       <div class="history-panel">
         <div class="history-header">
@@ -236,29 +278,23 @@
         artistLinkEl.addEventListener('click', (e) => {
             e.preventDefault();
             const url = artistLinkEl.getAttribute('href');
-            if (!url) return;
-
-            if (url.includes('t.me') && window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openTelegramLink(url);
-            } else {
-                window.Telegram.WebApp.openLink(url);
+            if (url) {
+                if (url.includes('t.me') && window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openTelegramLink(url);
+                } else {
+                    window.Telegram.WebApp.openLink(url);
+                }
             }
         });
 
-        historyBtn.addEventListener('click', () => {
-            historyOverlay.style.display = 'flex';
-        });
-
-        historyClose.addEventListener('click', () => {
-            historyOverlay.style.display = 'none';
-        });
-
+        // История
+        historyBtn.addEventListener('click', () => { historyOverlay.style.display = 'flex'; });
+        historyClose.addEventListener('click', () => { historyOverlay.style.display = 'none'; });
         historyOverlay.addEventListener('click', (e) => {
             if (e.target === historyOverlay) historyOverlay.style.display = 'none';
         });
 
         const USER_LOGIN = 'ovodtune'; 
-
         const artistLinks = {
             "netherlands": "https://t.me/ovod_radio",
             "torche": "https://t.me/slipknot",
@@ -267,7 +303,6 @@
         };
 
         let isPlaying = false;
-
         btn.addEventListener('click', () => {
             if (!isPlaying) {
                 audio.play();
@@ -285,22 +320,17 @@
                 const data = await response.json();
 
                 let showName = "OVOD RADIO"; 
-
-                if (data.playlist && data.playlist.trim() !== "") {
-                    showName = data.playlist;
-                } else if (data.djname && data.djname.trim() !== "") {
-                    showName = data.djname;
-                } else if (data.streamname && data.streamname.trim() !== "") {
-                    showName = data.streamname;
-                }
+                if (data.playlist && data.playlist.trim() !== "") showName = data.playlist;
+                else if (data.djname && data.djname.trim() !== "") showName = data.djname;
+                else if (data.streamname && data.streamname.trim() !== "") showName = data.streamname;
 
                 showName = showName.replace(/_/g, " ").replace(".m3u", "");
                 programLabelEl.textContent = showName;
 
                 const fullString = data.song || "Metal Radio Live";
-                let parts  = fullString.split(' - ');
+                let parts = fullString.split(' - ');
                 let artist = parts[0] ? parts[0].trim() : ""; 
-                let song   = parts[1] ? parts[1].trim() : ""; 
+                let song = parts[1] ? parts[1].trim() : ""; 
 
                 if (!song) {
                     titleEl.textContent = artist;
@@ -344,15 +374,10 @@
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
                         artist: song ? artist : showName,
-                        artwork: [
-                            { src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }
-                        ]
+                        artwork: [{ src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }]
                     });
                 }
-
-            } catch (error) {
-                console.error("Ошибка:", error);
-            }
+            } catch (error) { console.error("Ошибка:", error); }
         }
 
         updateMetadata();
