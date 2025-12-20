@@ -278,15 +278,23 @@
         const historyClose = document.getElementById('history-close');
         const historyList = document.getElementById('history-list');
 
+        // ✅ ИСПРАВЛЕНО: Кнопка канала НЕ ЗАКРЫВАЕТ приложение на iOS
         artistLinkEl.addEventListener('click', (e) => {
             e.preventDefault();
             const url = artistLinkEl.getAttribute('href');
-            if (url) {
-                if (url.includes('t.me') && window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.openTelegramLink(url);
-                } else {
-                    window.Telegram.WebApp.openLink(url);
-                }
+            const artistName = artistEl.textContent;
+            
+            if (url && window.Telegram?.WebApp) {
+                window.Telegram.WebApp.showConfirm(
+                    `🎸 Перейти в канал ${artistName}?`,
+                    (confirmed) => {
+                        if (confirmed) {
+                            window.Telegram.WebApp.openTelegramLink(url);
+                        }
+                    }
+                );
+            } else if (url) {
+                window.Telegram.WebApp.openLink(url);
             }
         });
 
@@ -305,17 +313,24 @@
             "red lama": "https://t.me/ovod_radio"
         };
 
+        // ✅ СИНХРОНИЗАЦИЯ состояния плеера
+        function updatePlayButton() {
+            const playing = !audio.paused;
+            btn.textContent = playing ? "PAUSE" : "PLAY";
+        }
+
         let isPlaying = false;
         btn.addEventListener('click', () => {
-            if (!isPlaying) {
-                audio.play();
-                btn.textContent = "PAUSE";
+            if (audio.paused) {
+                audio.play().catch(e => console.error('Play failed:', e));
             } else {
                 audio.pause();
-                btn.textContent = "PLAY";
             }
-            isPlaying = !isPlaying;
         });
+
+        // Слушаем реальные события плеера
+        audio.addEventListener('play', updatePlayButton);
+        audio.addEventListener('pause', updatePlayButton);
 
         async function updateMetadata() {
             try {
@@ -384,11 +399,17 @@
         }
 
         updateMetadata();
-        setInterval(updateMetadata, 5000);
+        setInterval(updateMetadata, 10000); // ✅ 10 сек вместо 5
 
         if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => { audio.play(); isPlaying = true; btn.textContent = "PAUSE"; });
-            navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); isPlaying = false; btn.textContent = "PLAY"; });
+            navigator.mediaSession.setActionHandler('play', () => { 
+                audio.play().catch(e => console.error(e));
+                updatePlayButton();
+            });
+            navigator.mediaSession.setActionHandler('pause', () => { 
+                audio.pause();
+                updatePlayButton();
+            });
         }
     </script>
 </body>
