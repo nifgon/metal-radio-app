@@ -6,260 +6,133 @@
     <title>Metal Radio</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-       /* Сброс отступов */
        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-       html, body {
-            height: 100%;
-            overflow: hidden; /* Запрещаем скролл */
-       }
-
+       html, body { height: 100%; overflow: hidden; }
        body {
             background-color: #000000;
             background-image: url('bg.png');
-            background-size: contain; /* Картинка всегда видна целиком */
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            
             color: #ffffff;
             font-family: sans-serif;
-            
-            /* Центрируем наш контейнер */
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        /* ГЛАВНЫЙ КОНТЕЙНЕР ПРИЛОЖЕНИЯ 
-           Ограничиваем его, чтобы на ПК не разъезжался */
         .app-container {
-            width: 100%;
-            height: 100%;
-            max-width: 450px; /* Макс ширина как у телефона */
-            max-height: 850px; 
-            
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            
-            /* Равномерно распределяем элементы по вертикали */
-            justify-content: space-between; 
-            
-            /* Отступы, чтобы не прилипало к краям рамки (шипам) */
-            padding: 80px 20px 40px 20px; 
+            width: 100%; height: 100%; max-width: 450px; max-height: 850px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: space-between; padding: 80px 20px 40px 20px; 
         }
-
-        /* Группировка верхнего контента */
-        .content-top {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        /* Статус "В ЭФИРЕ" */
-        .status-container {
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .on-air-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #ffffff;
-            opacity: 0.6;
-        }
-
+        .content-top { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .status-container { margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .on-air-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #ffffff; opacity: 0.6; }
         .program-label {
-            font-size: 16px;       
-            font-weight: 700;        
-            text-transform: uppercase; 
-            letter-spacing: 3px;     
-            color: #ff3333;          
-            text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+            font-size: 16px; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 3px; color: #ff3333; text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
             min-height: 20px; 
         }
-
-        /* ОБЛОЖКА - АДАПТИВНАЯ */
         .cover {
-            /* Размер зависит от высоты экрана (25%), но не больше 250px и не меньше 120px */
-            height: 25vh; 
-            width: 25vh; 
-            max-height: 250px; max-width: 250px;
-            min-height: 120px; min-width: 120px;
-            
-            background-color: #333;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            
-            margin: 30px 0 20px 0; /* Отступы сверху и снизу */
-            
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            height: 25vh; width: 25vh; max-height: 250px; max-width: 250px;
+            min-height: 120px; min-width: 120px; background-color: #333;
+            background-size: cover; background-position: center; border-radius: 15px;
+            margin: 30px 0 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             background-image: url('cover.png');
         }
-        
-        /* ТЕКСТ ТРЕКА */
-        .track-info {
-            margin-bottom: 10px;
-            width: 100%;
-            text-align: center;
-        }
-
+        .track-info { margin-bottom: 10px; width: 100%; text-align: center; }
         h2 { margin: 0 0 5px 0; font-size: 20px; line-height: 1.2; word-wrap: break-word;}
         p { margin: 0; opacity: 0.7; font-size: 14px; }
-        
-        /* КНОПКА PLAY - ЦЕНТРАЛЬНАЯ */
         button#play-btn {
-            padding: 15px 50px;
-            font-size: 20px;
-            font-weight: bold;
-            border: 2px solid #a61a1a; 
-            border-radius: 12px;
-            background-color: #7a0909; 
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); 
-            margin-top: 10px;
+            padding: 15px 50px; font-size: 20px; font-weight: bold;
+            border: 2px solid #a61a1a; border-radius: 12px; background-color: #7a0909; 
+            color: #ffffff; cursor: pointer; transition: all 0.2s ease;
+            text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3); margin-top: 10px;
         }
-
-        button#play-btn:active { 
-            transform: scale(0.95); 
-            background-color: #a61a1a; 
-        }
-
-        /* ССЫЛКА НА КАНАЛ */
+        button#play-btn:active { transform: scale(0.95); background-color: #a61a1a; }
         .artist-link-btn {
-            display: none; 
-            margin-top: 15px;
-            padding: 6px 15px;
-            font-size: 10px;
-            font-weight: bold;
-            text-decoration: none;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            background-color: rgba(0, 0, 0, 0.5);
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
+            display: none; margin-top: 15px; padding: 6px 15px; font-size: 10px;
+            font-weight: bold; text-decoration: none; color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.5); transition: all 0.2s;
+            text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;
         }
-        .artist-link-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: #fff;
-            opacity: 1;
-        }
-
-        /* НИЖНЯЯ ЧАСТЬ (ИСТОРИЯ) */
-        .content-bottom {
-            margin-top: auto; /* Прижимает блок к низу */
-            padding-bottom: 20px; /* Отступ от самого низа экрана */
-        }
-
+        .artist-link-btn:hover { background-color: rgba(255, 255, 255, 0.2); border-color: #fff; opacity: 1; }
+        .content-bottom { margin-top: auto; padding-bottom: 20px; }
         #history-btn {
-            padding: 8px 24px;
-            font-size: 11px;
-            border-radius: 999px;
-            border: 1px solid #444;
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
+            padding: 8px 24px; font-size: 11px; border-radius: 999px;
+            border: 1px solid #444; background: rgba(0,0,0,0.6);
+            color: #fff; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
         }
-
-        /* ОВЕРЛЕЙ ИСТОРИИ */
         .history-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; align-items: center; justify-content: center; z-index: 100;
         }
-
         .history-panel {
-            width: 90%;
-            max-width: 360px;
-            max-height: 70vh;
-            background: #111;
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
+            width: 90%; max-width: 360px; max-height: 70vh; background: #111;
+            border-radius: 16px; padding: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            display: flex; flex-direction: column;
         }
-
         .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
         }
-
         .history-close { cursor: pointer; opacity: 0.7; }
         .history-list { font-size: 12px; line-height: 1.4; overflow-y: auto; padding-right: 4px; }
         .history-item-time { color: #777; font-size: 11px; }
         .history-item-title { color: #fff; }
+
+        /* ✅ КНОПКА ЛАЙКА */
+        #like-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 50;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: rgba(255,0,0,0.8); border: none; color: white;
+            font-size: 24px; cursor: pointer; box-shadow: 0 4px 16px rgba(255,0,0,0.4);
+            transition: all 0.2s ease; display: none;
+        }
+        #like-btn:hover { transform: scale(1.1); background: rgba(255,0,0,1); }
+        #like-btn:active { transform: scale(0.95); }
+        #like-btn.success { background: rgba(0,255,0,0.8); }
     </style>
 </head>
 <body>
- <audio id="radio-player" preload="none">
+    <!-- ✅ БЫСТРАЯ ЗАГРУЗКА: preload="metadata" -->
+    <audio id="radio-player" preload="metadata">
         <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
- </audio>
-    <!-- Главный контейнер, который держит структуру -->
+    </audio>
+
     <div class="app-container">
-        
-        <!-- ВЕРХНЯЯ ЧАСТЬ -->
         <div class="content-top">
             <div class="status-container">
                 <div class="on-air-label">В ЭФИРЕ</div>
                 <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
             </div>
-
             <div class="cover" id="album-cover"></div>
-
             <div class="track-info">
                 <h2 id="song-title">Metal Radio</h2>
                 <p id="artist-name">Загрузка...</p>
             </div>
-
             <button id="play-btn">PLAY</button>
-
-            <a id="artist-link" href="#" class="artist-link-btn">
-                TELEGRAM
-            </a>
+            <a id="artist-link" href="#" class="artist-link-btn">TELEGRAM</a>
         </div>
-
-        <!-- НИЖНЯЯ ЧАСТЬ (КНОПКА ИСТОРИИ) -->
         <div class="content-bottom">
             <button id="history-btn">Ранее в эфире</button>
         </div>
     </div>
 
-    <!-- ОВЕРЛЕЙ -->
+    <!-- ✅ КНОПКА ЛАЙКА -->
+    <button id="like-btn">❤️</button>
+
+    <!-- ОВЕРЛЕЙ ИСТОРИИ -->
     <div id="history-overlay" class="history-overlay">
-      <div class="history-panel">
-        <div class="history-header">
-          <span>История эфира</span>
-          <span id="history-close" class="history-close">✕</span>
+        <div class="history-panel">
+            <div class="history-header">
+                <span>История эфира</span>
+                <span id="history-close" class="history-close">✕</span>
+            </div>
+            <div id="history-list" class="history-list">Загрузка истории...</div>
         </div>
-        <div id="history-list" class="history-list">
-          Загрузка истории...
-        </div>
-      </div>
     </div>
 
     <script>
@@ -272,38 +145,11 @@
         const artistEl = document.getElementById('artist-name');
         const programLabelEl = document.getElementById('program-label');
         const artistLinkEl = document.getElementById('artist-link');
-
+        const likeBtn = document.getElementById('like-btn');
         const historyBtn = document.getElementById('history-btn');
         const historyOverlay = document.getElementById('history-overlay');
         const historyClose = document.getElementById('history-close');
         const historyList = document.getElementById('history-list');
-
-        // ✅ ИСПРАВЛЕНО: Кнопка канала НЕ ЗАКРЫВАЕТ приложение на iOS
-        artistLinkEl.addEventListener('click', (e) => {
-            e.preventDefault();
-            const url = artistLinkEl.getAttribute('href');
-            const artistName = artistEl.textContent;
-            
-            if (url && window.Telegram?.WebApp) {
-                window.Telegram.WebApp.showConfirm(
-                    `🎸 Перейти в канал ${artistName}?`,
-                    (confirmed) => {
-                        if (confirmed) {
-                            window.Telegram.WebApp.openTelegramLink(url);
-                        }
-                    }
-                );
-            } else if (url) {
-                window.Telegram.WebApp.openLink(url);
-            }
-        });
-
-        // История
-        historyBtn.addEventListener('click', () => { historyOverlay.style.display = 'flex'; });
-        historyClose.addEventListener('click', () => { historyOverlay.style.display = 'none'; });
-        historyOverlay.addEventListener('click', (e) => {
-            if (e.target === historyOverlay) historyOverlay.style.display = 'none';
-        });
 
         const USER_LOGIN = 'ovodtune'; 
         const artistLinks = {
@@ -313,24 +159,64 @@
             "red lama": "https://t.me/ovod_radio"
         };
 
-        // ✅ СИНХРОНИЗАЦИЯ состояния плеера
-        function updatePlayButton() {
-            const playing = !audio.paused;
-            btn.textContent = playing ? "PAUSE" : "PLAY";
-        }
+        let currentTrack = '';
 
-        let isPlaying = false;
-        btn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play().catch(e => console.error('Play failed:', e));
-            } else {
-                audio.pause();
+        // ✅ iOS-FIX: Кнопка канала с подтверждением
+        artistLinkEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = artistLinkEl.href;
+            window.Telegram.WebApp.showConfirm(`🎸 Перейти в канал?`, (confirmed) => {
+                if (confirmed) window.Telegram.WebApp.openTelegramLink(url);
+            });
+        });
+
+        // История
+        historyBtn.addEventListener('click', () => historyOverlay.style.display = 'flex');
+        historyClose.addEventListener('click', () => historyOverlay.style.display = 'none');
+        historyOverlay.addEventListener('click', (e) => {
+            if (e.target === historyOverlay) historyOverlay.style.display = 'none';
+        });
+
+        // ✅ КНОПКА ЛАЙКА: Artist - Song в чат
+        likeBtn.addEventListener('click', () => {
+            if (currentTrack) {
+                const original = likeBtn.innerHTML;
+                likeBtn.innerHTML = '✓'; likeBtn.classList.add('success');
+                
+                window.Telegram.WebApp.openTelegramLink(
+                    `https://t.me/share/url?url=&text=${encodeURIComponent(currentTrack)}`
+                );
+                
+                setTimeout(() => {
+                    likeBtn.innerHTML = original;
+                    likeBtn.classList.remove('success');
+                }, 2000);
             }
         });
 
-        // Слушаем реальные события плеера
+        // ✅ ПЛЕЕР: Быстрая загрузка + синхронизация
+        function updatePlayButton() {
+            btn.textContent = audio.paused ? 'PLAY' : 'PAUSE';
+        }
+
+        btn.addEventListener('click', async () => {
+            try {
+                if (audio.paused) {
+                    await audio.play();
+                } else {
+                    audio.pause();
+                }
+            } catch(e) {
+                console.error('Play error:', e);
+                btn.textContent = 'ERROR';
+                setTimeout(() => updatePlayButton(), 2000);
+            }
+        });
+
         audio.addEventListener('play', updatePlayButton);
         audio.addEventListener('pause', updatePlayButton);
+        audio.addEventListener('loadstart', () => btn.textContent = 'LOADING...');
+        audio.addEventListener('canplay', () => updatePlayButton());
 
         async function updateMetadata() {
             try {
@@ -338,35 +224,34 @@
                 const data = await response.json();
 
                 let showName = "OVOD RADIO"; 
-                if (data.playlist && data.playlist.trim() !== "") showName = data.playlist;
-                else if (data.djname && data.djname.trim() !== "") showName = data.djname;
-                else if (data.streamname && data.streamname.trim() !== "") showName = data.streamname;
-
-                showName = showName.replace(/_/g, " ").replace(".m3u", "");
-                programLabelEl.textContent = showName;
+                if (data.playlist?.trim()) showName = data.playlist;
+                else if (data.djname?.trim()) showName = data.djname;
+                else if (data.streamname?.trim()) showName = data.streamname;
+                programLabelEl.textContent = showName.replace(/_/g, " ").replace(".m3u", "");
 
                 const fullString = data.song || "Metal Radio Live";
-                let parts = fullString.split(' - ');
-                let artist = parts[0] ? parts[0].trim() : ""; 
-                let song = parts[1] ? parts[1].trim() : ""; 
+                const parts = fullString.split(' - ');
+                const artist = parts[0]?.trim() || '';
+                const song = parts[1]?.trim() || '';
 
-                if (!song) {
-                    titleEl.textContent = artist;
-                    artistEl.textContent = "Сейчас играет";
-                } else {
-                    titleEl.textContent = song;
-                    artistEl.textContent = artist;
-                }
+                currentTrack = song ? `${artist} - ${song}` : fullString;
+                titleEl.textContent = song || artist || 'Metal Radio';
+                artistEl.textContent = song ? artist : 'Сейчас играет';
 
-                let artistKey = artist.toLowerCase();
+                // Артист ссылка
+                const artistKey = artist.toLowerCase();
                 if (artistLinks[artistKey]) {
                     artistLinkEl.href = artistLinks[artistKey];
                     artistLinkEl.style.display = "inline-block";
-                    artistLinkEl.textContent = "КАНАЛ " + artist.toUpperCase();
+                    artistLinkEl.textContent = `КАНАЛ ${artist.toUpperCase()}`;
                 } else {
                     artistLinkEl.style.display = "none";
                 }
 
+                // ✅ ПОКАЗЫВАЕМ ЛАЙК если есть трек
+                likeBtn.style.display = currentTrack && currentTrack !== 'Metal Radio Live' ? 'block' : 'none';
+
+                // История
                 if (Array.isArray(data.songs) && data.songs.length > 0) {
                     const lastSongs = data.songs.slice(-10).reverse();
                     let html = '';
@@ -379,37 +264,30 @@
                             <div class="history-item">
                                 <div class="history-item-time">${time}</div>
                                 <div class="history-item-title">${full}</div>
-                            </div>
-                            <hr style="border:0;border-top:1px solid #222;margin:4px 0;">
-                        `;
+                            </div><hr style="border:0;border-top:1px solid #222;margin:4px 0;">`;
                     });
                     historyList.innerHTML = html;
                 } else {
                     historyList.innerHTML = "История пока пуста.";
                 }
 
+                // MediaSession
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: song || artist,
                         artist: song ? artist : showName,
-                        artwork: [{ src: 'https://nifgon.github.io/metal-radio-app/cover.png', sizes: '512x512', type: 'image/png' }]
+                        artwork: [{ src: 'cover.png', sizes: '512x512', type: 'image/png' }]
                     });
                 }
             } catch (error) { console.error("Ошибка:", error); }
         }
 
         updateMetadata();
-        setInterval(updateMetadata, 10000); // ✅ 10 сек вместо 5
+        setInterval(updateMetadata, 10000);
 
         if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => { 
-                audio.play().catch(e => console.error(e));
-                updatePlayButton();
-            });
-            navigator.mediaSession.setActionHandler('pause', () => { 
-                audio.pause();
-                updatePlayButton();
-            });
+            navigator.mediaSession.setActionHandler('play', () => audio.play().catch(console.error));
+            navigator.mediaSession.setActionHandler('pause', () => audio.pause());
         }
     </script>
 </body>
