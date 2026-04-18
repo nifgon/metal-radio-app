@@ -302,7 +302,7 @@
     </div>
 
     <div class="tg-browser-banner" id="tg-banner" onclick="openInBrowser()">
-        Открыть в браузере для установки →
+        <span id="tg-banner-text">Открыть в браузере для установки →</span>
     </div>
     <div class="ios-hint" id="ios-hint">Нажми <strong>Поделиться</strong> → <strong>На экран Домой</strong></div>
 
@@ -354,19 +354,25 @@
             && (window.Telegram.WebApp.initData === '' || !window.Telegram.WebApp.initData)
             && !window.navigator.standalone
             && /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+        const isAndroid = /android/i.test(navigator.userAgent);
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
         function openInBrowser() {
-            const url = location.href;
-            // Android intent fallback
-            if (/android/i.test(navigator.userAgent)) {
-                location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW;end';
-            } else {
-                // iOS: открываем ссылку через Telegram openLink
-                if (tg) tg.openLink(url);
-                else window.open(url, '_blank');
+            const url = 'https://nifgon.github.io/metal-radio-app/';
+            if (isAndroid) {
+                location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;action=android.intent.action.VIEW;end';
             }
+            // iOS: нельзя открыть Safari из WebView программно — показываем инструкцию
         }
+
         if (isTgBrowser) {
-            document.getElementById('tg-banner').style.display = 'block';
+            const banner = document.getElementById('tg-banner');
+            const bannerText = document.getElementById('tg-banner-text');
+            banner.style.display = 'block';
+            if (isIos) {
+                bannerText.innerHTML = 'Нажми ••• → Открыть в Safari';
+                banner.onclick = null; // на iOS просто инструкция, не кнопка
+            }
         }
 
         // iOS Safari hint
