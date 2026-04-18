@@ -25,8 +25,8 @@
        body {
             background-color: #000000;
             background-image: url('bg2.png');
-            background-size: contain;
-            background-position: center top;
+            background-size: cover;
+            background-position: center center;
             background-repeat: no-repeat;
             color: #ffffff;
             font-family: sans-serif;
@@ -349,8 +349,11 @@
             installBtn.style.display = 'none';
         });
 
-        // Telegram browser detection
-        const isTgBrowser = /Telegram/i.test(navigator.userAgent) && !tg?.initData;
+        // Telegram browser detection: script loaded but not a real Mini App (initData empty)
+        const isTgBrowser = window.Telegram?.WebApp !== undefined
+            && (window.Telegram.WebApp.initData === '' || !window.Telegram.WebApp.initData)
+            && !window.navigator.standalone
+            && /iphone|ipad|ipod|android/i.test(navigator.userAgent);
         function openInBrowser() {
             const url = location.href;
             // Android intent fallback
