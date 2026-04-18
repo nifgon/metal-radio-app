@@ -42,11 +42,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding-top: max(40px, env(safe-area-inset-top, 40px));
+            justify-content: flex-start;
+            padding-top: max(60px, env(safe-area-inset-top, 60px));
             padding-bottom: max(30px, env(safe-area-inset-bottom, 30px));
             padding-left: max(20px, env(safe-area-inset-left, 20px));
             padding-right: max(20px, env(safe-area-inset-right, 20px));
+            gap: 0;
         }
 
         .content-top {
@@ -54,10 +55,13 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
+            flex: 1;
+            justify-content: center;
+            padding-bottom: 60px;
         }
 
         .status-container {
-            margin-bottom: 10px;
+            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -83,21 +87,21 @@
         }
 
         .cover {
-            height: 25vh;
-            width: 25vh;
-            max-height: 250px; max-width: 250px;
-            min-height: 120px; min-width: 120px;
+            height: 38vh;
+            width: 38vh;
+            max-height: 320px; max-width: 320px;
+            min-height: 180px; min-width: 180px;
             background-color: #333;
             background-size: cover;
             background-position: center;
             border-radius: 15px;
-            margin: 30px 0 20px 0;
+            margin: 24px 0 28px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             background-image: url('cover.png');
         }
 
         .track-info {
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             width: 100%;
             text-align: center;
         }
@@ -149,8 +153,7 @@
         }
 
         .content-bottom {
-            margin-top: auto;
-            padding-bottom: 20px;
+            padding-bottom: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
