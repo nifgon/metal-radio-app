@@ -26,7 +26,7 @@
             background-color: #000000;
             background-image: url('bg3.png');
             background-size: cover;
-            background-position: center center;
+            background-position: center bottom;
             background-repeat: no-repeat;
             color: #ffffff;
             font-family: sans-serif;
@@ -403,7 +403,11 @@
 
         async function updateMetadata() {
             try {
-                const res = await fetch(`https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`);
+                const apiUrl = `https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`;
+                let res = await fetch(apiUrl).catch(() => null);
+                if (!res || !res.ok) {
+                    res = await fetch('https://corsproxy.io/?' + encodeURIComponent(apiUrl));
+                }
                 const data = await res.json();
 
                 let showName = 'OVOD RADIO';
