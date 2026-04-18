@@ -13,12 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Metal Radio">
     <link rel="apple-touch-icon" href="cover.png">
 
-    <script>
-        // Загружаем Telegram SDK только внутри Telegram (Mini App или браузер)
-        if (location.hash.includes('tgWebApp') || /Telegram/i.test(navigator.userAgent) || document.referrer.includes('telegram')) {
-            document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
-        }
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
        * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -29,7 +24,7 @@
 
        body {
             background-color: #000000;
-            background-image: url('bg2.png');
+            background-image: url('bg3.png');
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
@@ -177,21 +172,7 @@
             cursor: pointer;
         }
 
-        /* Кнопка установки PWA */
-        #install-btn {
-            display: none;
-            padding: 6px 18px;
-            font-size: 10px;
-            border-radius: 999px;
-            border: 1px solid #7a0909;
-            background: rgba(122, 9, 9, 0.3);
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-        }
-
-        .history-overlay {
+.history-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.85);
@@ -302,7 +283,6 @@
 
         <div class="content-bottom">
             <button id="history-btn">Ранее в эфире</button>
-            <button id="install-btn">Установить приложение</button>
         </div>
     </div>
 
@@ -331,28 +311,8 @@
             navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
 
-        // PWA: кнопка установки
-        let deferredPrompt;
-        const installBtn = document.getElementById('install-btn');
-
-        window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'block';
-        });
-
-        installBtn.addEventListener('click', () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(() => {
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            });
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installBtn.style.display = 'none';
-        });
+        // PWA: скрываем промпт установки (кнопка убрана)
+        window.addEventListener('beforeinstallprompt', e => e.preventDefault());
 
         // Telegram browser detection: script loaded but not a real Mini App (initData empty)
         const isTgBrowser = window.Telegram?.WebApp !== undefined
