@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Metal Radio</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7a0909">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Metal Radio">
+    <link rel="apple-touch-icon" href="cover.png">
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+
+       html, body {
+            height: 100%;
+            overflow: hidden;
+       }
+
+       body {
+            background-color: #000000;
+            background-image: url('bg.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #ffffff;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            max-height: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 80px 20px 40px 20px;
+        }
+
+        .content-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .status-container {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .on-air-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffffff;
+            opacity: 0.6;
+        }
+
+        .program-label {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+            min-height: 20px;
+        }
+
+        .cover {
+            height: 25vh;
+            width: 25vh;
+            max-height: 250px; max-width: 250px;
+            min-height: 120px; min-width: 120px;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin: 30px 0 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            background-image: url('cover.png');
+        }
+
+        .track-info {
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 { margin: 0 0 5px 0; font-size: 20px; line-height: 1.2; word-wrap: break-word; }
+        p { margin: 0; opacity: 0.7; font-size: 14px; }
+
+        button#play-btn {
+            padding: 15px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #a61a1a;
+            border-radius: 12px;
+            background-color: #7a0909;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(166, 26, 26, 0.3);
+            margin-top: 10px;
+        }
+
+        button#play-btn:active {
+            transform: scale(0.95);
+            background-color: #a61a1a;
+        }
+
+        .artist-link-btn {
+            display: none;
+            margin-top: 15px;
+            padding: 6px 15px;
+            font-size: 10px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        .artist-link-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            opacity: 1;
+        }
+
+        .content-bottom {
+            margin-top: auto;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #history-btn {
+            padding: 8px 24px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid #444;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        /* Кнопка установки PWA */
+        #install-btn {
+            display: none;
+            padding: 6px 18px;
+            font-size: 10px;
+            border-radius: 999px;
+            border: 1px solid #7a0909;
+            background: rgba(122, 9, 9, 0.3);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .history-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .history-panel {
+            width: 90%;
+            max-width: 360px;
+            max-height: 70vh;
+            background: #111;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-close { cursor: pointer; opacity: 0.7; }
+        .history-list { font-size: 12px; line-height: 1.4; overflow-y: auto; padding-right: 4px; }
+        .history-item-time { color: #777; font-size: 11px; }
+        .history-item-title { color: #fff; }
+    </style>
+</head>
+<body>
+    <audio id="radio-player" preload="metadata">
+        <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
+    </audio>
+
+    <div class="app-container">
+        <div class="content-top">
+            <div class="status-container">
+                <div class="on-air-label">В ЭФИРЕ</div>
+                <div id="program-label" class="program-label">ЗАГРУЗКА...</div>
+            </div>
+
+            <div class="cover" id="album-cover"></div>
+
+            <div class="track-info">
+                <h2 id="song-title">Metal Radio</h2>
+                <p id="artist-name">Загрузка...</p>
+            </div>
+
+            <button id="play-btn">PLAY</button>
+
+            <a id="artist-link" href="#" class="artist-link-btn">TELEGRAM</a>
+        </div>
+
+        <div class="content-bottom">
+            <button id="history-btn">Ранее в эфире</button>
+            <button id="install-btn">Установить приложение</button>
+        </div>
+    </div>
+
+    <div id="history-overlay" class="history-overlay">
+        <div class="history-panel">
+            <div class="history-header">
+                <span>История эфира</span>
+                <span id="history-close" class="history-close">✕</span>
+            </div>
+            <div id="history-list" class="history-list">Загрузка истории...</div>
+        </div>
+    </div>
+
+    <script>
+        // Telegram — опционально, работает и без него
+        const tg = window.Telegram?.WebApp;
+        if (tg) { tg.ready(); tg.expand(); }
+
+        // PWA: регистрация service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+
+        // PWA: кнопка установки
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => {
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+        });
+
+        const audio = document.getElementById('radio-player');
+        const btn = document.getElementById('play-btn');
+        const titleEl = document.getElementById('song-title');
+        const artistEl = document.getElementById('artist-name');
+        const programLabelEl = document.getElementById('program-label');
+        const artistLinkEl = document.getElementById('artist-link');
+        const historyBtn = document.getElementById('history-btn');
+        const historyOverlay = document.getElementById('history-overlay');
+        const historyClose = document.getElementById('history-close');
+        const historyList = document.getElementById('history-list');
+
+        artistLinkEl.addEventListener('click', e => {
+            e.preventDefault();
+            const url = artistLinkEl.getAttribute('href');
+            const artistName = artistEl.textContent;
+            if (!url) return;
+
+            if (tg) {
+                tg.showConfirm(`Перейти в канал ${artistName}?`, confirmed => {
+                    if (confirmed) tg.openTelegramLink(url);
+                });
+            } else {
+                window.open(url, '_blank');
+            }
+        });
+
+        historyBtn.addEventListener('click', () => { historyOverlay.style.display = 'flex'; });
+        historyClose.addEventListener('click', () => { historyOverlay.style.display = 'none'; });
+        historyOverlay.addEventListener('click', e => {
+            if (e.target === historyOverlay) historyOverlay.style.display = 'none';
+        });
+
+        const USER_LOGIN = 'ovodtune';
+        const artistLinks = {
+            "netherlands": "https://t.me/ovod_radio",
+            "torche": "https://t.me/slipknot",
+            "helms alee": "https://t.me/ovod_radio",
+            "red lama": "https://t.me/ovod_radio"
+        };
+
+        function updatePlayButton() {
+            btn.textContent = audio.paused ? 'PLAY' : 'PAUSE';
+        }
+
+        btn.addEventListener('click', () => {
+            if (audio.paused) audio.play().catch(e => console.error(e));
+            else audio.pause();
+        });
+
+        audio.addEventListener('play', updatePlayButton);
+        audio.addEventListener('pause', updatePlayButton);
+
+        async function updateMetadata() {
+            try {
+                const res = await fetch(`https://myradio24.com/users/${USER_LOGIN}/status.json?t=${Date.now()}`);
+                const data = await res.json();
+
+                let showName = 'OVOD RADIO';
+                if (data.playlist?.trim()) showName = data.playlist;
+                else if (data.djname?.trim()) showName = data.djname;
+                else if (data.streamname?.trim()) showName = data.streamname;
+                showName = showName.replace(/_/g, ' ').replace('.m3u', '');
+                programLabelEl.textContent = showName;
+
+                const fullString = data.song || 'Metal Radio Live';
+                const parts = fullString.split(' - ');
+                const artist = parts[0]?.trim() || '';
+                const song = parts[1]?.trim() || '';
+
+                if (!song) {
+                    titleEl.textContent = artist;
+                    artistEl.textContent = 'Сейчас играет';
+                } else {
+                    titleEl.textContent = song;
+                    artistEl.textContent = artist;
+                }
+
+                const artistKey = artist.toLowerCase();
+                if (artistLinks[artistKey]) {
+                    artistLinkEl.href = artistLinks[artistKey];
+                    artistLinkEl.style.display = 'inline-block';
+                    artistLinkEl.textContent = 'КАНАЛ ' + artist.toUpperCase();
+                } else {
+                    artistLinkEl.style.display = 'none';
+                }
+
+                if (Array.isArray(data.songs) && data.songs.length > 0) {
+                    const lastSongs = data.songs.slice(-10).reverse();
+                    historyList.innerHTML = lastSongs.map(item => {
+                        const full = item.songtitle
+                            ? `${item.artist} - ${item.songtitle}`
+                            : (item.song || '');
+                        return `
+                            <div class="history-item">
+                                <div class="history-item-time">${item.time || ''}</div>
+                                <div class="history-item-title">${full}</div>
+                            </div>
+                            <hr style="border:0;border-top:1px solid #222;margin:4px 0;">`;
+                    }).join('');
+                } else {
+                    historyList.innerHTML = 'История пока пуста.';
+                }
+
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: song || artist,
+                        artist: song ? artist : showName,
+                        artwork: [{ src: 'cover.png', sizes: '512x512', type: 'image/png' }]
+                    });
+                }
+            } catch (e) { console.error('Ошибка метаданных:', e); }
+        }
+
+        updateMetadata();
+        setInterval(updateMetadata, 10000);
+
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => {
+                audio.play().catch(e => console.error(e));
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                audio.pause();
+            });
+        }
+    </script>
+</body>
+</html>
