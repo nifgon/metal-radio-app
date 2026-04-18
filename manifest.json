@@ -1,6 +1,6 @@
 {
-  "name": "OVOD Metal Radio",
-  "short_name": "Metal Radio",
+  "name": "OVOD Radio",
+  "short_name": "OVOD Radio",
   "description": "Интернет-радио тяжёлой музыки",
   "start_url": "/metal-radio-app/",
   "scope": "/metal-radio-app/",
