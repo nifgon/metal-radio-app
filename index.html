@@ -20,6 +20,7 @@
 
        html, body {
             height: 100%;
+            height: var(--real-vh, 100%);
             overflow: hidden;
        }
 
@@ -261,6 +262,13 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/metal-radio-app/sw.js').catch(() => {});
         }
+
+        // Фикс высоты для iOS Safari (тулбар меняет viewport)
+        function setRealVH() {
+            document.documentElement.style.setProperty('--real-vh', window.innerHeight + 'px');
+        }
+        setRealVH();
+        window.addEventListener('resize', setRealVH);
 
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand(); }
