@@ -220,6 +220,25 @@
         .history-item-time { color: #777; font-size: 11px; }
         .history-item-title { color: #fff; }
 
+        /* Telegram browser banner */
+        .tg-browser-banner {
+            display: none;
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top, 12px));
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7a0909;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #fff;
+            text-align: center;
+            z-index: 200;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+
         /* iOS install hint */
         .ios-hint {
             display: none;
@@ -279,6 +298,9 @@
         </div>
     </div>
 
+    <div class="tg-browser-banner" id="tg-banner" onclick="openInBrowser()">
+        Открыть в браузере для установки →
+    </div>
     <div class="ios-hint" id="ios-hint">Нажми <strong>Поделиться</strong> → <strong>На экран Домой</strong></div>
 
     <div id="history-overlay" class="history-overlay">
@@ -323,6 +345,23 @@
         window.addEventListener('appinstalled', () => {
             installBtn.style.display = 'none';
         });
+
+        // Telegram browser detection
+        const isTgBrowser = /Telegram/i.test(navigator.userAgent) && !tg?.initData;
+        function openInBrowser() {
+            const url = location.href;
+            // Android intent fallback
+            if (/android/i.test(navigator.userAgent)) {
+                location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW;end';
+            } else {
+                // iOS: открываем ссылку через Telegram openLink
+                if (tg) tg.openLink(url);
+                else window.open(url, '_blank');
+            }
+        }
+        if (isTgBrowser) {
+            document.getElementById('tg-banner').style.display = 'block';
+        }
 
         // iOS Safari hint
         const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
