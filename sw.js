@@ -1,4 +1,4 @@
-const CACHE = 'metal-radio-v4';
+const CACHE = 'metal-radio-v5';
 const STATIC = ['/metal-radio-app/', '/metal-radio-app/index.html', '/metal-radio-app/bg.png', '/metal-radio-app/cover.png', '/metal-radio-app/manifest.json'];
 
 self.addEventListener('install', e => {
