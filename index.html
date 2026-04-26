@@ -229,14 +229,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
         #reload-btn:active { background: rgba(122,9,9,0.7); }
+        #reload-btn.spinning {
+            background: rgba(122,9,9,0.7);
+            border-color: rgba(255,51,51,0.6);
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        #reload-btn.spinning span {
+            display: inline-block;
+            animation: spin 0.5s ease-out;
+        }
     </style>
 </head>
 <body>
  <div class="bg"></div>
- <button id="reload-btn" title="Перезагрузить стрим">↺</button>
+ <button id="reload-btn" title="Перезагрузить стрим"><span>↺</span></button>
  <audio id="radio-player" preload="metadata">
         <source src="https://myradio24.org/ovodtune" type="audio/mpeg">
  </audio>
@@ -295,6 +307,12 @@
         if (tg) { tg.ready(); tg.expand(); }
 
         document.getElementById('reload-btn').addEventListener('click', () => {
+            const btn = document.getElementById('reload-btn');
+            btn.classList.remove('spinning');
+            void btn.offsetWidth; // reflow to restart animation
+            btn.classList.add('spinning');
+            btn.addEventListener('animationend', () => btn.classList.remove('spinning'), { once: true });
+
             const wasPlaying = !audio.paused;
             audio.pause();
             audio.load();
