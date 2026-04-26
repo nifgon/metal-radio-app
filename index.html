@@ -306,19 +306,6 @@
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand(); }
 
-        document.getElementById('reload-btn').addEventListener('click', () => {
-            const btn = document.getElementById('reload-btn');
-            btn.classList.remove('spinning');
-            void btn.offsetWidth; // reflow to restart animation
-            btn.classList.add('spinning');
-            btn.addEventListener('animationend', () => btn.classList.remove('spinning'), { once: true });
-
-            const wasPlaying = !audio.paused;
-            audio.pause();
-            audio.load();
-            if (wasPlaying) audio.play().catch(() => {});
-        });
-
         const audio = document.getElementById('radio-player');
         const btn = document.getElementById('play-btn');
         const titleEl = document.getElementById('song-title');
@@ -330,6 +317,51 @@
         const historyOverlay = document.getElementById('history-overlay');
         const historyClose = document.getElementById('history-close');
         const historyList = document.getElementById('history-list');
+
+        let stalledTimer = null;
+
+        function reloadStream() {
+            const reloadBtn = document.getElementById('reload-btn');
+            reloadBtn.classList.remove('spinning');
+            void reloadBtn.offsetWidth;
+            reloadBtn.classList.add('spinning');
+            reloadBtn.addEventListener('animationend', () => reloadBtn.classList.remove('spinning'), { once: true });
+
+            audio.pause();
+            audio.load();
+            audio.play().catch(() => {});
+        }
+
+        document.getElementById('reload-btn').addEventListener('click', reloadStream);
+
+        // Всегда перезагружаем поток при снятии с паузы — выбрасываем старый буфер
+        btn.addEventListener('click', () => {
+            if (audio.paused) reloadStream();
+            else audio.pause();
+        });
+
+        // Возврат из фона (звонок, смена приложения) — перезагружаем если играло
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !audio.paused) reloadStream();
+        });
+
+        // Страховка: если поток завис — перезапуск через 6 сек
+        audio.addEventListener('stalled', () => {
+            clearTimeout(stalledTimer);
+            stalledTimer = setTimeout(() => { if (!audio.paused) reloadStream(); }, 6000);
+        });
+        audio.addEventListener('waiting', () => {
+            clearTimeout(stalledTimer);
+            stalledTimer = setTimeout(() => { if (!audio.paused) reloadStream(); }, 6000);
+        });
+        audio.addEventListener('playing', () => clearTimeout(stalledTimer));
+
+        function updatePlayButton() {
+            btn.textContent = audio.paused ? 'PLAY' : 'PAUSE';
+        }
+
+        audio.addEventListener('play', updatePlayButton);
+        audio.addEventListener('pause', updatePlayButton);
 
         artistLinkEl.addEventListener('click', (e) => {
             e.preventDefault();
@@ -361,18 +393,6 @@
             "helms alee": "https://t.me/ovod_radio",
             "red lama": "https://t.me/ovod_radio"
         };
-
-        function updatePlayButton() {
-            btn.textContent = audio.paused ? 'PLAY' : 'PAUSE';
-        }
-
-        btn.addEventListener('click', () => {
-            if (audio.paused) audio.play().catch(e => console.error('Play failed:', e));
-            else audio.pause();
-        });
-
-        audio.addEventListener('play', updatePlayButton);
-        audio.addEventListener('pause', updatePlayButton);
 
         async function updateMetadata() {
             try {
