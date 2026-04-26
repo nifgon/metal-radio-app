@@ -340,11 +340,6 @@
             else audio.pause();
         });
 
-        // Возврат из фона (звонок, смена приложения) — перезагружаем если играло
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && !audio.paused) reloadStream();
-        });
-
         // Страховка: если поток завис — перезапуск через 6 сек
         audio.addEventListener('stalled', () => {
             clearTimeout(stalledTimer);
