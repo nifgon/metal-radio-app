@@ -345,11 +345,18 @@
     </div>
 
     <script>
-        window.addEventListener('load', () => {
+        function hideLoader() {
             const loader = document.getElementById('loader');
+            if (!loader) return;
             loader.classList.add('hidden');
             loader.addEventListener('transitionend', () => loader.remove(), { once: true });
-        });
+        }
+        // Убираем лоадер как только загрузился фон, максимум 3 сек
+        const bgImg = new Image();
+        bgImg.onload = hideLoader;
+        bgImg.onerror = hideLoader;
+        bgImg.src = 'bg5.png';
+        setTimeout(hideLoader, 3000);
 
         // PWA: регистрация service worker
         if ('serviceWorker' in navigator) {
