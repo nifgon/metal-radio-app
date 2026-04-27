@@ -408,6 +408,7 @@
         const historyList = document.getElementById('history-list');
 
         let stalledTimer = null;
+        let pausedAt = null;
 
         function reloadStream() {
             const reloadBtn = document.getElementById('reload-btn');
@@ -438,14 +439,19 @@
         btn.addEventListener('click', () => {
             if (audio.paused) {
                 setButtonState('loading');
-                reloadStream();
+                const pauseDuration = pausedAt ? (Date.now() - pausedAt) : Infinity;
+                if (pauseDuration > 30000) {
+                    reloadStream();
+                } else {
+                    audio.play().catch(() => {});
+                }
             } else {
                 audio.pause();
             }
         });
 
         audio.addEventListener('playing', () => setButtonState('playing'));
-        audio.addEventListener('pause',   () => setButtonState('paused'));
+        audio.addEventListener('pause',   () => { setButtonState('paused'); pausedAt = Date.now(); });
         audio.addEventListener('waiting', () => { if (!audio.paused) setButtonState('loading'); });
 
         // Страховка: если поток завис — перезапуск через 6 сек
