@@ -1,4 +1,4 @@
-const CACHE = 'metal-radio-v6';
+const CACHE = 'ovod-radio-v1';
 const STATIC = ['/metal-radio-app/bg.png', '/metal-radio-app/cover.png', '/metal-radio-app/manifest.json'];
 
 self.addEventListener('install', e => {
