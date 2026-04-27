@@ -439,12 +439,7 @@
         btn.addEventListener('click', () => {
             if (audio.paused) {
                 setButtonState('loading');
-                const pauseDuration = pausedAt ? (Date.now() - pausedAt) : Infinity;
-                if (pauseDuration > 30000) {
-                    reloadStream();
-                } else {
-                    audio.play().catch(() => {});
-                }
+                reloadStream();
             } else {
                 audio.pause();
             }
