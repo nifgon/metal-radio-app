@@ -233,6 +233,34 @@
         }
         #reload-btn:active { background: rgba(122,9,9,0.7); }
 
+        @media (orientation: landscape) {
+            #landscape-block {
+                display: flex !important;
+            }
+        }
+        #landscape-block {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            color: #fff;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-family: sans-serif;
+        }
+        #landscape-block span:first-child {
+            font-size: 48px;
+        }
+        #landscape-block span:last-child {
+            font-size: 13px;
+            opacity: 0.5;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
         #loader {
             position: fixed;
             inset: 0;
@@ -271,6 +299,7 @@
     </style>
 </head>
 <body>
+ <div id="landscape-block"><span>⟳</span><span>Поверни телефон</span></div>
  <div id="loader"><img src="cover.png" alt=""></div>
  <div class="bg"></div>
  <button id="reload-btn" title="Перезагрузить стрим"><span>↺</span></button>
